@@ -1,0 +1,17 @@
+# Base image
+FROM python:3.13.1-slim
+
+# Çalışma dizini oluşturma
+WORKDIR /app
+
+# Gerekli dosyaları container'a kopyalama
+COPY requirements.txt .
+
+# Gereksinimleri yükleme
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Uygulama kodlarını kopyalama
+COPY . .
+
+# Flask uygulamasını başlatma
+CMD ["python", "app.py"]
