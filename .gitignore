@@ -1,15 +1,12 @@
-# Java - Maven
+### Java - Maven ###
 DearDiary/target/
-DearDiary/.idea/*
-DearDiary/.mvn/*
-
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
+DearDiary/.idea/
+DearDiary/.mvn/
+!DearDiary/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+### IDEs ###
 .apt_generated
 .classpath
 .factorypath
@@ -17,12 +14,11 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
+.vscode/
 
 ### NetBeans ###
 /nbproject/private/
@@ -34,16 +30,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-
-
-# Python - Flask
+### Python - Flask ###
 emotionAnalysisFromText/__pycache__/
 emotionAnalysisFromText/.venv/
 emotionAnalysisFromText/venv/
 
-# General
+### General ###
 *.log
 .env
