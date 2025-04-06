@@ -1,0 +1,13 @@
+# Java - Maven
+DearDiary/target/
+DearDiary/.idea/
+DearDiary/.mvn/
+
+# Python - Flask
+emotionAnalysisFromText/__pycache__/
+emotionAnalysisFromText/.venv/
+emotionAnalysisFromText/venv/
+
+# General
+*.log
+.env
