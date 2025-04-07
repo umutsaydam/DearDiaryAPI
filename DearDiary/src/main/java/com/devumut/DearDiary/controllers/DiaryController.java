@@ -7,19 +7,16 @@ import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.DiaryService;
+import com.devumut.DearDiary.services.EmotionPredictService;
 import com.devumut.DearDiary.services.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
+
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,16 +25,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/diary")
 public class DiaryController {
 
-    private final String flaskUrl = "http://flask-app:5000";
-    private final WebClient.Builder webClientBuilder;
+    private final EmotionPredictService emotionPredictService;
     private final DiaryService diaryService;
     private final Mapper<DiaryEntity, DiaryDto> mapper;
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
 
     @Autowired
-    public DiaryController(WebClient.Builder webClientBuilder, DiaryService diaryService, Mapper<DiaryEntity, DiaryDto> mapper, JwtUtil jwtUtil, TokenService tokenService) {
-        this.webClientBuilder = webClientBuilder;
+    public DiaryController(EmotionPredictService emotionPredictService, DiaryService diaryService, Mapper<DiaryEntity, DiaryDto> mapper, JwtUtil jwtUtil, TokenService tokenService) {
+        this.emotionPredictService = emotionPredictService;
         this.diaryService = diaryService;
         this.mapper = mapper;
         this.jwtUtil = jwtUtil;
@@ -56,25 +52,13 @@ public class DiaryController {
 
         DiaryEntity diaryEntity = mapper.mapFrom(diaryDto);
 
-        String emotionResult = webClientBuilder.baseUrl(flaskUrl)
-                .build()
-                .post()
-                .uri("/predict")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(Map.of("text", diaryEntity.getDiary_content()))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode root = objectMapper.readTree(emotionResult);
-        int predictedEmotion = root.get("predicted_label").asInt();
+        int predictedEmotion = emotionPredictService.predictEmotionFromText(diaryEntity.getDiary_content());
 
         UUID userId = jwtUtil.extractUserId(token);
         UserEntity user = new UserEntity();
         user.setUser_id(userId);
         diaryEntity.setUser(user);
-        diaryEntity.setDiary_emotion(emotionResult == null ? 0 : predictedEmotion);
+        diaryEntity.setDiary_emotion(predictedEmotion);
         DiaryEntity savedDiaryEntity = diaryService.saveDiary(diaryEntity);
         DiaryDto savedDiaryDto = mapper.mapTo(savedDiaryEntity);
 
@@ -127,19 +111,7 @@ public class DiaryController {
         }
         DiaryEntity oldDiaryEntity = optionalDiaryEntity.get();
         if (newDiaryEntity.getDiary_emotion() == oldDiaryEntity.getDiary_emotion()) {
-            String emotionResult = webClientBuilder.baseUrl(flaskUrl)
-                    .build()
-                    .post()
-                    .uri("/predict")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Map.of("text", newDiaryEntity.getDiary_content()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(emotionResult);
-            int predictedEmotion = root.get("predicted_label").asInt();
+            int predictedEmotion = emotionPredictService.predictEmotionFromText(newDiaryEntity.getDiary_content());
             newDiaryEntity.setDiary_emotion(predictedEmotion);
         }
 
