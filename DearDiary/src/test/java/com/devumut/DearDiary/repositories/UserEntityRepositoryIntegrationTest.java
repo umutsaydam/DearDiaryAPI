@@ -29,9 +29,6 @@ public class UserEntityRepositoryIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-//    @Autowired
-//    private JwtTokenizer jwtTokenizer;
-
     @Autowired
     private TokenService tokenService;
 
