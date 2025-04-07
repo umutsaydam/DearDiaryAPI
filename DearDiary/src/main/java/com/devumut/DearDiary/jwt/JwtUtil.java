@@ -1,6 +1,8 @@
 package com.devumut.DearDiary.jwt;
 
+import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -51,8 +53,12 @@ public class JwtUtil {
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsTResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsTResolver.apply(claims);
+        try {
+            final Claims claims = extractAllClaims(token);
+            return claimsTResolver.apply(claims);
+        } catch (ExpiredJwtException ex) {
+            throw new TokenNotValidException("JWT expired.");
+        }
     }
 
     private Claims extractAllClaims(String token) {
