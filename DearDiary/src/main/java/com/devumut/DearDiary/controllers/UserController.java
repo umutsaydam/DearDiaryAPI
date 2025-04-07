@@ -3,11 +3,12 @@ package com.devumut.DearDiary.controllers;
 import com.devumut.DearDiary.domain.dto.PasswordDto;
 import com.devumut.DearDiary.domain.dto.UserDto;
 import com.devumut.DearDiary.domain.entities.UserEntity;
+import com.devumut.DearDiary.exceptions.PasswordsAreSameException;
+import com.devumut.DearDiary.exceptions.PasswordsDoNotMatchException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.TokenService;
 import com.devumut.DearDiary.services.UserService;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
-@Log
 public class UserController {
 
     private final Mapper<UserEntity, UserDto> mapper;
@@ -38,40 +38,30 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
         UserEntity userEntity = mapper.mapFrom(userDto);
+        UserEntity savedUserEntity = userService.createUser(userEntity);
+        UserDto savedUserDto = mapper.mapTo(savedUserEntity);
 
-        try {
-            UserEntity savedUserEntity = userService.createUser(userEntity);
-            UserDto savedUserDto = mapper.mapTo(savedUserEntity);
-
-            return new ResponseEntity<>(savedUserDto, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(savedUserDto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody UserDto userDto) {
         UserEntity userEntity = mapper.mapFrom(userDto);
+        UserEntity loginUser = userService.loginUser(userEntity);
 
-        try {
-            UserEntity loginUser = userService.loginUser(userEntity);
-            String token = jwtUtil.generateToken(loginUser.getUser_id(), loginUser.getUsername());
-            tokenService.removeTokensByUserId(loginUser.getUser_id());
-            log.info(loginUser.getUser_id() + " */*/*/* " + token);
-            tokenService.saveToken(loginUser.getUser_id(), token);
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        String token = jwtUtil.generateToken(loginUser.getUser_id(), loginUser.getUsername());
+        tokenService.removeTokensByUserId(loginUser.getUser_id());
+        tokenService.saveToken(loginUser.getUser_id(), token);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String token) {
-        if (token.startsWith("Bearer")) {
-            token = token.substring(7);
-        }
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
             return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
         }
@@ -84,22 +74,20 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @RequestBody PasswordDto passwordDto
     ) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        if (!passwordDto.getNew_password().equals(passwordDto.getNew_password_confirm()) || passwordDto.getCurrent_password().equals(passwordDto.getNew_password())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (!passwordDto.getNew_password().equals(passwordDto.getNew_password_confirm())) {
+            throw new PasswordsDoNotMatchException("The new password and its confirmation do not match.");
+        }
+        if (passwordDto.getCurrent_password().equals(passwordDto.getNew_password())) {
+            throw new PasswordsAreSameException("New password cannot be the same as the old password.");
         }
 
-        try {
-            UUID userId = jwtUtil.extractUserId(token);
-            UserEntity user = userService.changePasswordByUserId(userId, passwordDto.getCurrent_password(), passwordDto.getNew_password());
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        UUID userId = jwtUtil.extractUserId(token);
+        UserEntity user = userService.changePasswordByUserId(userId, passwordDto.getCurrent_password(), passwordDto.getNew_password());
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

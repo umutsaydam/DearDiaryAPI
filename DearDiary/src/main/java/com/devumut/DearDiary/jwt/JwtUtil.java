@@ -43,6 +43,13 @@ public class JwtUtil {
         return UUID.fromString(claims.get("userId").toString());
     }
 
+    public String extractTokenFromHeader(String token) {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        return token;
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsTResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsTResolver.apply(claims);

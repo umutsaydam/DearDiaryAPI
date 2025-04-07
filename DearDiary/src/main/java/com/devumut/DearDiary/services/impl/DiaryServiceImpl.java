@@ -1,6 +1,8 @@
 package com.devumut.DearDiary.services.impl;
 
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
+import com.devumut.DearDiary.exceptions.DatabaseOperationException;
+import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.repositories.DiaryRepository;
 import com.devumut.DearDiary.services.DiaryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,11 @@ public class DiaryServiceImpl implements DiaryService {
 
     @Override
     public DiaryEntity saveDiary(DiaryEntity diary) {
-        return diaryRepository.save(diary);
+        try {
+            return diaryRepository.save(diary);
+        } catch (DatabaseOperationException ex) {
+            throw new DatabaseOperationException("Failed to save diary", ex);
+        }
     }
 
     @Override
@@ -37,7 +43,7 @@ public class DiaryServiceImpl implements DiaryService {
             Optional.ofNullable(diary.getDiary_content()).ifPresent(existingDiary::setDiary_content);
             Optional.ofNullable(diary.getDiary_emotion()).ifPresent(existingDiary::setDiary_emotion);
             return diaryRepository.save(existingDiary);
-        }).orElseThrow(() -> new RuntimeException("Unknown a diary."));
+        }).orElseThrow(() -> new DiaryNotFoundException("Unknown a diary."));
     }
 
     @Override
@@ -47,6 +53,7 @@ public class DiaryServiceImpl implements DiaryService {
 
     @Override
     public Optional<DiaryEntity> getDiaryById(UUID diaryId) {
-        return diaryRepository.findById(diaryId);
+        return Optional.ofNullable(diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new DiaryNotFoundException("Diary not found with the provided ID.")));
     }
 }

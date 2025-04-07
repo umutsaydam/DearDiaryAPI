@@ -3,10 +3,12 @@ package com.devumut.DearDiary.controllers;
 import com.devumut.DearDiary.domain.dto.DiaryDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
+import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.DiaryService;
 import com.devumut.DearDiary.services.TokenService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,63 +48,52 @@ public class DiaryController {
     public ResponseEntity<?> saveDiary(
             @RequestHeader("Authorization") String token,
             @RequestBody DiaryDto diaryDto
-    ) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+    ) throws JsonProcessingException {
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new TokenNotValidException("Token is not valid.");
         }
 
         DiaryEntity diaryEntity = mapper.mapFrom(diaryDto);
-        try {
-            String emotionResult = webClientBuilder.baseUrl(flaskUrl)
-                    .build()
-                    .post()
-                    .uri("/predict")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Map.of("text", diaryEntity.getDiary_content()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(emotionResult);
-            int predictedEmotion = root.get("predicted_label").asInt();
+        String emotionResult = webClientBuilder.baseUrl(flaskUrl)
+                .build()
+                .post()
+                .uri("/predict")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of("text", diaryEntity.getDiary_content()))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
-            UUID userId = jwtUtil.extractUserId(token);
-            UserEntity user = new UserEntity();
-            user.setUser_id(userId);
-            diaryEntity.setUser(user);
-            diaryEntity.setDiary_emotion(emotionResult == null ? 0 : predictedEmotion);
-            DiaryEntity savedDiaryEntity = diaryService.saveDiary(diaryEntity);
-            DiaryDto savedDiaryDto = mapper.mapTo(savedDiaryEntity);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(emotionResult);
+        int predictedEmotion = root.get("predicted_label").asInt();
 
-            return new ResponseEntity<>(savedDiaryDto, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        UUID userId = jwtUtil.extractUserId(token);
+        UserEntity user = new UserEntity();
+        user.setUser_id(userId);
+        diaryEntity.setUser(user);
+        diaryEntity.setDiary_emotion(emotionResult == null ? 0 : predictedEmotion);
+        DiaryEntity savedDiaryEntity = diaryService.saveDiary(diaryEntity);
+        DiaryDto savedDiaryDto = mapper.mapTo(savedDiaryEntity);
+
+        return new ResponseEntity<>(savedDiaryDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/get-diaries")
     public ResponseEntity<?> getDiaries(@RequestHeader("Authorization") String token) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new TokenNotValidException("Token is not valid.");
         }
 
-        try {
-            UUID userId = jwtUtil.extractUserId(token);
-            List<DiaryEntity> list = diaryService.getAllDiariesByUserId(userId);
-            List<DiaryDto> listDto = list.stream().map(entity ->
-                    new DiaryDto(entity.getDiary_id(), entity.getDiary_date(), entity.getDiary_content(), entity.getDiary_emotion())
-            ).collect(Collectors.toList());
-            return new ResponseEntity<>(listDto, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        UUID userId = jwtUtil.extractUserId(token);
+        List<DiaryEntity> list = diaryService.getAllDiariesByUserId(userId);
+        List<DiaryDto> listDto = list.stream().map(entity ->
+                new DiaryDto(entity.getDiary_id(), entity.getDiary_date(), entity.getDiary_content(), entity.getDiary_emotion())
+        ).collect(Collectors.toList());
+        return new ResponseEntity<>(listDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete-diary")
@@ -110,9 +101,7 @@ public class DiaryController {
             @RequestHeader("Authorization") String token,
             @RequestParam("id") UUID diaryId
     ) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -124,45 +113,39 @@ public class DiaryController {
     public ResponseEntity<?> updateDiary(
             @RequestHeader("Authorization") String token,
             @RequestBody DiaryDto diaryDto
-    ) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+    ) throws JsonProcessingException {
+        token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new TokenNotValidException("Token is not valid.");
         }
 
-        try {
-            DiaryEntity newDiaryEntity = mapper.mapFrom(diaryDto);
-            Optional<DiaryEntity> optionalDiaryEntity = diaryService.getDiaryById(newDiaryEntity.getDiary_id());
+        DiaryEntity newDiaryEntity = mapper.mapFrom(diaryDto);
+        Optional<DiaryEntity> optionalDiaryEntity = diaryService.getDiaryById(newDiaryEntity.getDiary_id());
 
-            if (optionalDiaryEntity.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            DiaryEntity oldDiaryEntity = optionalDiaryEntity.get();
-            if (newDiaryEntity.getDiary_emotion() == oldDiaryEntity.getDiary_emotion()) {
-                String emotionResult = webClientBuilder.baseUrl(flaskUrl)
-                        .build()
-                        .post()
-                        .uri("/predict")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("text", newDiaryEntity.getDiary_content()))
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode root = objectMapper.readTree(emotionResult);
-                int predictedEmotion = root.get("predicted_label").asInt();
-                newDiaryEntity.setDiary_emotion(predictedEmotion);
-            }
-
-            DiaryEntity updatedDiaryEntity = diaryService.updateDiary(newDiaryEntity);
-            DiaryDto updatedDiaryDto = mapper.mapTo(updatedDiaryEntity);
-
-            return new ResponseEntity<>(updatedDiaryDto, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        if (optionalDiaryEntity.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        DiaryEntity oldDiaryEntity = optionalDiaryEntity.get();
+        if (newDiaryEntity.getDiary_emotion() == oldDiaryEntity.getDiary_emotion()) {
+            String emotionResult = webClientBuilder.baseUrl(flaskUrl)
+                    .build()
+                    .post()
+                    .uri("/predict")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Map.of("text", newDiaryEntity.getDiary_content()))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(emotionResult);
+            int predictedEmotion = root.get("predicted_label").asInt();
+            newDiaryEntity.setDiary_emotion(predictedEmotion);
+        }
+
+        DiaryEntity updatedDiaryEntity = diaryService.updateDiary(newDiaryEntity);
+        DiaryDto updatedDiaryDto = mapper.mapTo(updatedDiaryEntity);
+
+        return new ResponseEntity<>(updatedDiaryDto, HttpStatus.OK);
     }
 }
