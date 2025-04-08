@@ -26,7 +26,7 @@ public class DiaryServiceImpl implements DiaryService {
     public DiaryEntity saveDiary(DiaryEntity diary) {
         try {
             return diaryRepository.save(diary);
-        } catch (DatabaseOperationException ex) {
+        } catch (DataIntegrityViolationException ex) {
             throw new DatabaseOperationException("Failed to save diary", ex);
         }
     }
