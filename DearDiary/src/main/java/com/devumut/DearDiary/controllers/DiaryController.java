@@ -3,6 +3,7 @@ package com.devumut.DearDiary.controllers;
 import com.devumut.DearDiary.domain.dto.DiaryDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
+import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
@@ -98,10 +99,10 @@ public class DiaryController {
         return new ResponseEntity<>(listDto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-diary")
+    @DeleteMapping("/delete-diary/{id}")
     public ResponseEntity<HttpStatus> deleteDiary(
             @RequestHeader("Authorization") String token,
-            @RequestParam("id") UUID diaryId
+            @PathVariable("id") UUID diaryId
     ) {
         token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
