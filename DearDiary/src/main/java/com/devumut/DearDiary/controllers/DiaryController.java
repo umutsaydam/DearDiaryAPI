@@ -65,6 +65,24 @@ public class DiaryController {
         return new ResponseEntity<>(savedDiaryDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("/get-diary/{id}")
+    public ResponseEntity<?> getDiary(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") UUID diaryId
+    ) {
+        token = jwtUtil.extractTokenFromHeader(token);
+        if (!tokenService.isTokenValid(token)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<DiaryEntity> optionalDiaryEntity = diaryService.getDiaryById(diaryId);
+        if (optionalDiaryEntity.isEmpty()) {
+            throw new DiaryNotFoundException("Diary not found with the provided ID.");
+        }
+        DiaryEntity diaryEntity = optionalDiaryEntity.get();
+        DiaryDto diaryDto = mapper.mapTo(diaryEntity);
+        return new ResponseEntity<>(diaryDto, HttpStatus.OK);
+    }
+
     @GetMapping("/get-diaries")
     public ResponseEntity<?> getDiaries(@RequestHeader("Authorization") String token) {
         token = jwtUtil.extractTokenFromHeader(token);
