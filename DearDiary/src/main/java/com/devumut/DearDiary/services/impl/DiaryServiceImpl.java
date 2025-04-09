@@ -6,6 +6,7 @@ import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.repositories.DiaryRepository;
 import com.devumut.DearDiary.services.DiaryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
