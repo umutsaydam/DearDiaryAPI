@@ -1,10 +1,7 @@
 package com.devumut.DearDiary.jwt;
 
 import com.devumut.DearDiary.exceptions.TokenNotValidException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -56,8 +53,8 @@ public class JwtUtil {
         try {
             final Claims claims = extractAllClaims(token);
             return claimsTResolver.apply(claims);
-        } catch (ExpiredJwtException ex) {
-            throw new TokenNotValidException("JWT expired.");
+        } catch (ExpiredJwtException | MalformedJwtException ex) {
+            throw new TokenNotValidException("JWT expired or wrong.");
         }
     }
 
