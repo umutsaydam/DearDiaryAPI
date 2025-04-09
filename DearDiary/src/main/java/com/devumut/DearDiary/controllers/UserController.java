@@ -5,6 +5,7 @@ import com.devumut.DearDiary.domain.dto.UserDto;
 import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.PasswordsAreSameException;
 import com.devumut.DearDiary.exceptions.PasswordsDoNotMatchException;
+import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.TokenService;
@@ -63,7 +64,7 @@ public class UserController {
     public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String token) {
         token = jwtUtil.extractTokenFromHeader(token);
         if (!tokenService.isTokenValid(token)) {
-            return new ResponseEntity<>("Invalid token", HttpStatus.BAD_REQUEST);
+            throw new TokenNotValidException("Token is not valid.");
         }
         tokenService.removeToken(token);
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
