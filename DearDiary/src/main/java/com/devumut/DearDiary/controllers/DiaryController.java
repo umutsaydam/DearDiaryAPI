@@ -126,7 +126,7 @@ public class DiaryController {
         Optional<DiaryEntity> optionalDiaryEntity = diaryService.getDiaryById(newDiaryEntity.getDiary_id());
 
         if (optionalDiaryEntity.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new DiaryNotFoundException("Diary not found with the provided ID.");
         }
         DiaryEntity oldDiaryEntity = optionalDiaryEntity.get();
         if (newDiaryEntity.getDiary_emotion() == oldDiaryEntity.getDiary_emotion()) {
