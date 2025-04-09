@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,10 +15,9 @@ import java.util.Map;
 @Service
 public class EmotionPredictServiceImpl implements EmotionPredictService {
 
-//   If you are using docker please use this url
-    private final String flaskUrl = "http://flask-app:5000";
-//    If you are using local host please use this url
-//    private final String flaskUrl = "http://127.0.0.1:5000";
+    @Value("${flask.url}")
+    private String flaskUrl;
+
     private final WebClient.Builder webClientBuilder;
 
     @Autowired
