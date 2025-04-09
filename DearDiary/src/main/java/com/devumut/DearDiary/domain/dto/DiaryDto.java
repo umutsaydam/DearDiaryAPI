@@ -1,6 +1,7 @@
 package com.devumut.DearDiary.domain.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class DiaryDto {
     private UUID diary_id;
     private Date diary_date;
