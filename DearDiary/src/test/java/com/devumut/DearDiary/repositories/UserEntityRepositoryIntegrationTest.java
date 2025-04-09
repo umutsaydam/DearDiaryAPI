@@ -1,8 +1,6 @@
 package com.devumut.DearDiary.repositories;
 
 import com.devumut.DearDiary.domain.entities.UserEntity;
-import com.devumut.DearDiary.services.TokenService;
-import io.jsonwebtoken.impl.JwtTokenizer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserEntityRepositoryIntegrationTest {
 
@@ -28,9 +26,6 @@ public class UserEntityRepositoryIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private TokenService tokenService;
 
     @Test
     public void testThatUserCanBeRegister() {
