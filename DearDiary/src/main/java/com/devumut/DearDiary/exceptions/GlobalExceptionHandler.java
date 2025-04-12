@@ -37,4 +37,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDatabaseOperationException(DatabaseOperationException ex) {
         return new ResponseEntity<>(ex.getMessage() + " " + ex.getCause(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(DiaryAlreadyExistException.class)
+    public ResponseEntity<String> handleDiaryAlreadyExistException(DiaryAlreadyExistException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
 }

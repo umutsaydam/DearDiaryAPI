@@ -3,6 +3,7 @@ package com.devumut.DearDiary.controllers;
 import com.devumut.DearDiary.domain.dto.DiaryDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
+import com.devumut.DearDiary.exceptions.DiaryAlreadyExistException;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.exceptions.TokenNotValidException;
 import com.devumut.DearDiary.jwt.JwtUtil;
@@ -17,6 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,16 +55,22 @@ public class DiaryController {
         if (!tokenService.isTokenValid(token)) {
             throw new TokenNotValidException("Token is not valid.");
         }
+        if ((diaryDto.getDiary_date() == null && diaryService.isExistDiaryByDate(new Date())) ||
+                (diaryDto.getDiary_date() != null && diaryService.isExistDiaryByDate(diaryDto.getDiary_date()))) {
+            throw new DiaryAlreadyExistException("Diary was already added.");
+        }
 
         DiaryEntity diaryEntity = mapper.mapFrom(diaryDto);
 
-        int predictedEmotion = emotionPredictService.predictEmotionFromText(diaryEntity.getDiary_content());
+        if(diaryEntity.getDiary_emotion() == -1){
+            int predictedEmotion = emotionPredictService.predictEmotionFromText(diaryEntity.getDiary_content());
+            diaryEntity.setDiary_emotion(predictedEmotion);
+        }
 
         UUID userId = jwtUtil.extractUserId(token);
         UserEntity user = new UserEntity();
         user.setUser_id(userId);
         diaryEntity.setUser(user);
-        diaryEntity.setDiary_emotion(predictedEmotion);
         DiaryEntity savedDiaryEntity = diaryService.saveDiary(diaryEntity);
         DiaryDto savedDiaryDto = mapper.mapTo(savedDiaryEntity);
 

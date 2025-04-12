@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,5 +60,13 @@ public class DiaryServiceImpl implements DiaryService {
     public Optional<DiaryEntity> getDiaryById(UUID diaryId) {
         return Optional.ofNullable(diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new DiaryNotFoundException("Diary not found with the provided ID.")));
+    }
+
+    @Override
+    public boolean isExistDiaryByDate(Date date) {
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        return diaryRepository.getDiaryByDate(localDate).isPresent();
     }
 }

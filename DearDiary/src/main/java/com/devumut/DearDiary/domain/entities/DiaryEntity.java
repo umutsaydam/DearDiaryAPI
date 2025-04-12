@@ -31,7 +31,7 @@ public class DiaryEntity {
     private String diary_content;
 
     @Column(nullable = false)
-    private int diary_emotion;
+    private int diary_emotion = -1;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

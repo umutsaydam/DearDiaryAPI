@@ -18,5 +18,5 @@ public class DiaryDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date diary_date;
     private String diary_content;
-    private int diary_emotion = 0;
+    private int diary_emotion = -1;
 }
