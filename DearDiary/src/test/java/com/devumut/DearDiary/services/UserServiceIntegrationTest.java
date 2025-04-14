@@ -32,7 +32,9 @@ public class UserServiceIntegrationTest {
     public void testThatUserCanBeSaved() {
         UserEntity userEntity = TestDataUtil.getUserEntityA();
 
-        UserEntity savedUser = underTest.createUser(TestDataUtil.getUserEntityA());
+        underTest.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = underTest.loginUser(TestDataUtil.getUserEntityA());
+
         assertThat(savedUser.getUser_id()).isNotNull();
         assertThat(savedUser.getUsername()).isEqualTo(userEntity.getUsername());
         assertThat(passwordEncoder.matches(userEntity.getPassword(), savedUser.getPassword())).isTrue();
@@ -42,20 +44,22 @@ public class UserServiceIntegrationTest {
     public void testThatUserCanNotBeSavedWithSameUsername() {
         underTest.createUser(TestDataUtil.getUserEntityA());
 
-        assertThrows(RuntimeException.class, () -> {
-            underTest.createUser(TestDataUtil.getUserEntityA());
-        });
+        assertThrows(RuntimeException.class, () -> underTest.createUser(TestDataUtil.getUserEntityA()));
     }
 
     @Test
     public void testThatExistUsernameForSavedUser() {
-        UserEntity savedUser = underTest.createUser(TestDataUtil.getUserEntityA());
+        underTest.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = underTest.loginUser(TestDataUtil.getUserEntityA());
+
         assertThat(underTest.isUserExistByUsername(savedUser.getUsername())).isTrue();
     }
 
     @Test
     public void testThatUserCanLoginSuccessfully() {
-        UserEntity savedUser = underTest.createUser(TestDataUtil.getUserEntityA());
+        underTest.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = underTest.loginUser(TestDataUtil.getUserEntityA());
+
         UserEntity loginUser = underTest.loginUser(TestDataUtil.getUserEntityA());
 
         assertThat(savedUser).isEqualTo(loginUser);
@@ -63,14 +67,14 @@ public class UserServiceIntegrationTest {
 
     @Test
     public void testThatNotSavedUserCanNotLoginRuntimeException() {
-        assertThrows(RuntimeException.class, () -> {
-            underTest.loginUser(TestDataUtil.getUserEntityA());
-        });
+        assertThrows(RuntimeException.class, () -> underTest.loginUser(TestDataUtil.getUserEntityA()));
     }
 
     @Test
     public void testThatUserCanChangePasswordByUserId() {
-        UserEntity savedUser = underTest.createUser(TestDataUtil.getUserEntityA());
+        underTest.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = underTest.loginUser(TestDataUtil.getUserEntityA());
+
         UserEntity updatedUser = underTest.changePasswordByUserId(savedUser.getUser_id(), "NEW_PASSWORD", "NEW_PASSWORD");
 
         assertThat(savedUser.getPassword()).isNotEqualTo(updatedUser.getPassword());
@@ -81,8 +85,6 @@ public class UserServiceIntegrationTest {
         UserEntity notSavedUser = TestDataUtil.getUserEntityA();
         notSavedUser.setUser_id(UUID.randomUUID());
 
-        assertThrows(RuntimeException.class, () -> {
-            underTest.changePasswordByUserId(notSavedUser.getUser_id(), "NEW_PASSWORD", "NEW_PASSWORD");
-        });
+        assertThrows(RuntimeException.class, () -> underTest.changePasswordByUserId(notSavedUser.getUser_id(), "NEW_PASSWORD", "NEW_PASSWORD"));
     }
 }

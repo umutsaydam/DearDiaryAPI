@@ -5,17 +5,14 @@ import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.DatabaseOperationException;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
-import com.devumut.DearDiary.repositories.DiaryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +34,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUsersDiaryCanBeSaved() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity = TestDataUtil.getDiaryEntityA();
         diaryEntity.setUser(savedUser);
         DiaryEntity savedDiary = underTest.saveDiary(diaryEntity);
@@ -59,7 +58,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUsersDiaryCanBeDeleted() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity = TestDataUtil.getDiaryEntityA();
         diaryEntity.setUser(savedUser);
         DiaryEntity savedDiary = underTest.saveDiary(diaryEntity);
@@ -69,7 +70,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUserCanUpdateDiary() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity = TestDataUtil.getDiaryEntityA();
         diaryEntity.setUser(savedUser);
         DiaryEntity savedDiary = underTest.saveDiary(diaryEntity);
@@ -86,7 +89,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUserCanNotUpdateDiaryWithNotSavedDiaryDiaryNotFoundException() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity = TestDataUtil.getDiaryEntityA();
         diaryEntity.setDiary_id(UUID.randomUUID());
         diaryEntity.setUser(savedUser);
@@ -98,7 +103,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUserCanGetAllDiaries() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity1 = TestDataUtil.getDiaryEntityA();
         diaryEntity1.setUser(savedUser);
         underTest.saveDiary(diaryEntity1);
@@ -117,7 +124,9 @@ public class DiaryServiceIntegrationTest {
 
     @Test
     public void testThatUserCanNotGetDiaryByDiaryIdDiaryNotFoundException() {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         DiaryEntity diaryEntity = TestDataUtil.getDiaryEntityA();
         diaryEntity.setUser(savedUser);
         diaryEntity.setDiary_id(UUID.randomUUID());

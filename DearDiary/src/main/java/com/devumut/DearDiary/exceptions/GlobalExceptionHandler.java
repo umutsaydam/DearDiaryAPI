@@ -42,4 +42,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDiaryAlreadyExistException(DiaryAlreadyExistException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(UsernameAlreadyTakenException.class)
+    public ResponseEntity<String> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

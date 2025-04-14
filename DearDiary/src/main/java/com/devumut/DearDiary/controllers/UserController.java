@@ -6,6 +6,7 @@ import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.PasswordsAreSameException;
 import com.devumut.DearDiary.exceptions.PasswordsDoNotMatchException;
 import com.devumut.DearDiary.exceptions.TokenNotValidException;
+import com.devumut.DearDiary.exceptions.UsernameAlreadyTakenException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.TokenService;
@@ -39,10 +40,11 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
         UserEntity userEntity = mapper.mapFrom(userDto);
-        UserEntity savedUserEntity = userService.createUser(userEntity);
-        UserDto savedUserDto = mapper.mapTo(savedUserEntity);
-
-        return new ResponseEntity<>(savedUserDto, HttpStatus.CREATED);
+        if (userService.isUserExistByUsername(userEntity.getUsername())) {
+            throw new UsernameAlreadyTakenException("This username already taken!");
+        }
+        userService.createUser(userEntity);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

@@ -5,7 +5,7 @@ import com.devumut.DearDiary.domain.entities.UserEntity;
 import java.util.UUID;
 
 public interface UserService {
-    UserEntity createUser(UserEntity user);
+    void createUser(UserEntity user);
 
     boolean isUserExistByUsername(String username);
 

@@ -66,7 +66,9 @@ public class DiaryControllerIntegrationTests {
     */
     @Test
     public void testThatDiaryCanBeSavedSuccessfullyReturnsHttp200Ok() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
         DiaryDto diaryDto = TestDataUtil.getDiaryDtoA();
@@ -85,7 +87,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanBeSavedSuccessfullyReturnsSavedDiary() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
         DiaryDto diaryDto = TestDataUtil.getDiaryDtoA();
@@ -108,7 +112,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanGetAllDiariesSuccessfullyReturnsHttp200Ok() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 
@@ -134,7 +140,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanGetAllDiariesSuccessfullyReturnsDiaries() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 
@@ -180,7 +188,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanBeDeletedSuccessfullyReturnsHttp200Ok() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 
@@ -201,7 +211,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanBeUpdatedSuccessfullyReturnsHttp200Ok() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 
@@ -227,7 +239,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatDiaryCanBeUpdatedSuccessfullyReturnsUpdatedDiary() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 
@@ -265,7 +279,9 @@ public class DiaryControllerIntegrationTests {
 
     @Test
     public void testThatCanNotUpdateDiaryCauseNotSavedReturnsDiaryNotFoundException() throws Exception {
-        UserEntity userEntity = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity userEntity = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
 

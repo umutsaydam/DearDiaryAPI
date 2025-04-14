@@ -68,27 +68,6 @@ public class UserControllerIntegrationTests {
         );
     }
 
-    @Test
-    public void testThatUserRegisterSuccessfullyReturnsSavedUser() throws Exception {
-        UserDto userEntity = TestDataUtil.getUserDtoA();
-        String userJson = mapper.writeValueAsString(userEntity);
-
-        MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.post("/user/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(userJson)
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.user_id").isNotEmpty()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.username").value(userEntity.getUsername())
-        ).andReturn();
-
-        String responseJson = result.getResponse().getContentAsString();
-        JsonNode jsonNode = mapper.readTree(responseJson);
-        String hashedPassword = jsonNode.get("password").asText();
-
-        assertThat(passwordEncoder.matches(userEntity.getPassword(), hashedPassword)).isTrue();
-    }
 
     @Test
     public void testThatUserCanLoginSuccessfullyReturns200Ok() throws Exception {
@@ -150,7 +129,9 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void testThatUserCanNotLogoutReturnsTokenNotValidException() throws Exception {
-        UserEntity savedUser = userService.createUser(TestDataUtil.getUserEntityA());
+        userService.createUser(TestDataUtil.getUserEntityA());
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String invalidToken = jwtUtil.generateToken(savedUser.getUser_id(), savedUser.getUsername());
 
         mockMvc.perform(

@@ -31,7 +31,8 @@ public class TokenServiceIntegrationTest {
     @Test
     public void testThatTokenCanBeSavedAndTokenIsValid() {
         UserEntity userEntity = TestDataUtil.getUserEntityA();
-        UserEntity savedUser = userService.createUser(userEntity);
+        userService.createUser(userEntity);
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
 
         String token = jwtUtil.generateToken(savedUser.getUser_id(), savedUser.getUsername());
         underTest.saveToken(savedUser.getUser_id(), token);
@@ -42,7 +43,9 @@ public class TokenServiceIntegrationTest {
     @Test
     public void testThatTokenIsNotValid() {
         UserEntity userEntity = TestDataUtil.getUserEntityA();
-        UserEntity savedUser = userService.createUser(userEntity);
+        userService.createUser(userEntity);
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
+
         String token = jwtUtil.generateToken(savedUser.getUser_id(), savedUser.getUsername());
 
         assertThat(underTest.isTokenValid(token)).isFalse();
@@ -51,7 +54,8 @@ public class TokenServiceIntegrationTest {
     @Test
     public void testThatTokenCanRemove() {
         UserEntity userEntity = TestDataUtil.getUserEntityA();
-        UserEntity savedUser = userService.createUser(userEntity);
+        userService.createUser(userEntity);
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
 
         String token = jwtUtil.generateToken(savedUser.getUser_id(), savedUser.getUsername());
         underTest.saveToken(savedUser.getUser_id(), token);
@@ -64,7 +68,8 @@ public class TokenServiceIntegrationTest {
     @Test
     public void testThatTokenCanRemoveByUserId() {
         UserEntity userEntity = TestDataUtil.getUserEntityA();
-        UserEntity savedUser = userService.createUser(userEntity);
+        userService.createUser(userEntity);
+        UserEntity savedUser = userService.loginUser(TestDataUtil.getUserEntityA());
 
         String token = jwtUtil.generateToken(savedUser.getUser_id(), savedUser.getUsername());
         underTest.saveToken(savedUser.getUser_id(), token);

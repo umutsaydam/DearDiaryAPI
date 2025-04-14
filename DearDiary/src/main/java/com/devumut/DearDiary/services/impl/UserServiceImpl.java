@@ -23,12 +23,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity createUser(UserEntity user) {
+    public void createUser(UserEntity user) {
         if (isUserExistByUsername(user.getUsername())) {
             throw new RuntimeException("This username already taken!");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return repository.save(user);
+        repository.save(user);
     }
 
     @Override
