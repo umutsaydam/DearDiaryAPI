@@ -18,6 +18,8 @@ public class JwtUtil {
 
     @Value("${jwt.secretKey}")
     String secretKey;
+    @Value("${jwt.expirationTime}")
+    Long expirationTime;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -28,7 +30,7 @@ public class JwtUtil {
                 .subject(username)
                 .claim("userId", userId.toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -50,12 +52,8 @@ public class JwtUtil {
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsTResolver) {
-        try {
-            final Claims claims = extractAllClaims(token);
-            return claimsTResolver.apply(claims);
-        } catch (ExpiredJwtException | MalformedJwtException ex) {
-            throw new TokenNotValidException("JWT expired or wrong.");
-        }
+        final Claims claims = extractAllClaims(token);
+        return claimsTResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {

@@ -11,6 +11,8 @@ import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.services.TokenService;
 import com.devumut.DearDiary.services.UserService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,5 +94,18 @@ public class UserController {
         UserEntity user = userService.changePasswordByUserId(userId, passwordDto.getCurrent_password(), passwordDto.getNew_password());
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping("/token-reusable")
+    public ResponseEntity<?> tokenUsable(@RequestHeader("Authorization") String tokenHeader) {
+        try {
+            String token = jwtUtil.extractTokenFromHeader(tokenHeader);
+            if (!tokenService.isTokenValid(token)) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (ExpiredJwtException ex) {
+            throw new TokenNotValidException("JWT expired.");
+        }
     }
 }
