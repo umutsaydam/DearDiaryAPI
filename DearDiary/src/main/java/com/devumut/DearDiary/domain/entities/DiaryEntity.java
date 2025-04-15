@@ -23,7 +23,6 @@ public class DiaryEntity {
     private UUID diary_id;
 
     @Column(name = "diary_date", columnDefinition = "TIMESTAMP(0)")
-    @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date diary_date;
 

@@ -18,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +62,10 @@ public class DiaryController {
         if(diaryEntity.getDiary_emotion() == -1){
             int predictedEmotion = emotionPredictService.predictEmotionFromText(diaryEntity.getDiary_content());
             diaryEntity.setDiary_emotion(predictedEmotion);
+        }
+
+        if (diaryEntity.getDiary_date() == null) {
+            diaryEntity.setDiary_date(new Date());
         }
 
         UUID userId = jwtUtil.extractUserId(token);
