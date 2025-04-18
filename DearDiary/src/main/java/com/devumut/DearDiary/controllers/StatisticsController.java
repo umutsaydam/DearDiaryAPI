@@ -1,5 +1,6 @@
 package com.devumut.DearDiary.controllers;
 
+import com.devumut.DearDiary.domain.dto.DiaryEmotionDto;
 import com.devumut.DearDiary.domain.dto.TotalStatisticsDto;
 import com.devumut.DearDiary.domain.entities.DiaryEmotionEntity;
 import com.devumut.DearDiary.domain.entities.TotalDiaryStatisticsEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/statistics")
@@ -48,7 +50,7 @@ public class StatisticsController {
     }
 
     @GetMapping("/total-emotion-statistics")
-    public ResponseEntity<?> getTotalEmotionStatistics(
+    public ResponseEntity<List<DiaryEmotionDto>> getTotalEmotionStatistics(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "all") String timeRange
     ) {
@@ -59,8 +61,10 @@ public class StatisticsController {
         UUID userId = jwtUtil.extractUserId(token);
 
         List<DiaryEmotionEntity> list = statisticsService.getTotalEmotionCounts(userId, timeRange);
-
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        List<DiaryEmotionDto> dtoList = list.stream().map(entity ->
+            new DiaryEmotionDto(entity.getEmotion_id(), entity.getEmotion_count())
+        ).toList(); ;
+        return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
 }
