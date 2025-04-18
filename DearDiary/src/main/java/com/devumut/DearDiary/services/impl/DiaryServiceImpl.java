@@ -1,6 +1,7 @@
 package com.devumut.DearDiary.services.impl;
 
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
+import com.devumut.DearDiary.domain.entities.TotalDiaryStatisticsEntity;
 import com.devumut.DearDiary.exceptions.DatabaseOperationException;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.repositories.DiaryRepository;
@@ -11,11 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class DiaryServiceImpl implements DiaryService {
@@ -68,5 +65,17 @@ public class DiaryServiceImpl implements DiaryService {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
         return diaryRepository.getDiaryByDate(localDate).isPresent();
+    }
+
+    @Override
+    public TotalDiaryStatisticsEntity getTotalDiaryStatistics(UUID userId) {
+        List<Object[]> resultList = diaryRepository.getTotalStatistics(userId);
+        Object[] result = resultList.get(0);
+
+        int totalDiaries = result[0] != null ? ((Number) result[0]).intValue() : 0;
+        int currentStreak = result[1] != null ? ((Number) result[1]).intValue() : 0;
+        int longestStreak = result[2] != null ? ((Number) result[2]).intValue() : 0;
+
+        return new TotalDiaryStatisticsEntity(totalDiaries, currentStreak, longestStreak);
     }
 }

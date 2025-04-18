@@ -1,7 +1,9 @@
 package com.devumut.DearDiary.controllers;
 
 import com.devumut.DearDiary.domain.dto.DiaryDto;
+import com.devumut.DearDiary.domain.dto.TotalStatisticsDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
+import com.devumut.DearDiary.domain.entities.TotalDiaryStatisticsEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.DiaryAlreadyExistException;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
@@ -31,14 +33,16 @@ public class DiaryController {
     private final EmotionPredictService emotionPredictService;
     private final DiaryService diaryService;
     private final Mapper<DiaryEntity, DiaryDto> mapper;
+    private final Mapper<TotalDiaryStatisticsEntity, TotalStatisticsDto> statisticsMapper;
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
 
     @Autowired
-    public DiaryController(EmotionPredictService emotionPredictService, DiaryService diaryService, Mapper<DiaryEntity, DiaryDto> mapper, JwtUtil jwtUtil, TokenService tokenService) {
+    public DiaryController(EmotionPredictService emotionPredictService, DiaryService diaryService, Mapper<DiaryEntity, DiaryDto> mapper, Mapper<TotalDiaryStatisticsEntity, TotalStatisticsDto> statisticsMapper, JwtUtil jwtUtil, TokenService tokenService) {
         this.emotionPredictService = emotionPredictService;
         this.diaryService = diaryService;
         this.mapper = mapper;
+        this.statisticsMapper = statisticsMapper;
         this.jwtUtil = jwtUtil;
         this.tokenService = tokenService;
     }
@@ -59,7 +63,7 @@ public class DiaryController {
 
         DiaryEntity diaryEntity = mapper.mapFrom(diaryDto);
 
-        if(diaryEntity.getDiary_emotion() == -1){
+        if (diaryEntity.getDiary_emotion() == -1) {
             int predictedEmotion = emotionPredictService.predictEmotionFromText(diaryEntity.getDiary_content());
             diaryEntity.setDiary_emotion(predictedEmotion);
         }
@@ -150,5 +154,19 @@ public class DiaryController {
         DiaryDto updatedDiaryDto = mapper.mapTo(updatedDiaryEntity);
 
         return new ResponseEntity<>(updatedDiaryDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/total-diary-statistics")
+    public ResponseEntity<?> getTotalDiaryStatistics(
+            @RequestHeader("Authorization") String token
+    ) {
+        token = jwtUtil.extractTokenFromHeader(token);
+        if (!tokenService.isTokenValid(token)) {
+            throw new TokenNotValidException("Token is not valid.");
+        }
+        UUID userId = jwtUtil.extractUserId(token);
+        TotalDiaryStatisticsEntity statisticsEntity = diaryService.getTotalDiaryStatistics(userId);
+
+        return new ResponseEntity<>(statisticsMapper.mapTo(statisticsEntity), HttpStatus.OK);
     }
 }
