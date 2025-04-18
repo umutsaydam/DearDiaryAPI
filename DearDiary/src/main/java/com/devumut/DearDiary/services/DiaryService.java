@@ -1,7 +1,6 @@
 package com.devumut.DearDiary.services;
 
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
-import com.devumut.DearDiary.domain.entities.TotalDiaryStatisticsEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +19,4 @@ public interface DiaryService {
     Optional<DiaryEntity> getDiaryById(UUID diaryId);
 
     boolean isExistDiaryByDate(Date date);
-
-    TotalDiaryStatisticsEntity getTotalDiaryStatistics(UUID userId);
 }
