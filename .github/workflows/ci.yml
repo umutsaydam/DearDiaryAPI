@@ -30,13 +30,13 @@ jobs:
         run: mvn test
         working-directory: DearDiary
 
-      - name: Dockerize Application
-        run: |
-          docker build -t myapp .
-          docker run -d -p 8080:8080 myapp
-
-      - name: Push Docker Image to Docker Hub
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-          docker tag myapp $DOCKER_USERNAME/myapp:latest
-          docker push $DOCKER_USERNAME/myapp:latest
+#      - name: Dockerize Application
+#        run: |
+#          docker build -t myapp .
+#          docker run -d -p 8080:8080 myapp
+#
+#      - name: Push Docker Image to Docker Hub
+#        run: |
+#          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#          docker tag myapp $DOCKER_USERNAME/myapp:latest
+#          docker push $DOCKER_USERNAME/myapp:latest
