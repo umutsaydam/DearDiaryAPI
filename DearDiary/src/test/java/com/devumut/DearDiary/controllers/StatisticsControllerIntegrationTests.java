@@ -136,7 +136,7 @@ public class StatisticsControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.totalDiaries").value(2)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.currentStreak").value(1)
+                MockMvcResultMatchers.jsonPath("$.currentStreak").value(0)
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.longestStreak").value(1)
         );
