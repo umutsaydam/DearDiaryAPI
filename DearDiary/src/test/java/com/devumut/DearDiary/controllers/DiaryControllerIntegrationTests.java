@@ -1,20 +1,25 @@
 package com.devumut.DearDiary.controllers;
 
 import com.devumut.DearDiary.TestDataUtil;
-import com.devumut.DearDiary.config.EmotionPredictServiceTestConfig;
+import com.devumut.DearDiary.config.TestConfig;
 import com.devumut.DearDiary.domain.dto.DiaryDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.jwt.JwtUtil;
 import com.devumut.DearDiary.mappers.Mapper;
+import com.devumut.DearDiary.mappers.impl.DiaryMapper;
 import com.devumut.DearDiary.services.DiaryService;
+import com.devumut.DearDiary.services.EmotionPredictService;
 import com.devumut.DearDiary.services.TokenService;
 import com.devumut.DearDiary.services.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,17 +41,18 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-@Import(EmotionPredictServiceTestConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 public class DiaryControllerIntegrationTests {
+
     @Autowired
-    private ObjectMapper mapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,13 +64,46 @@ public class DiaryControllerIntegrationTests {
     private UserService userService;
 
     @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
     private TokenService tokenService;
 
-    @Autowired
-    private Mapper<DiaryEntity, DiaryDto> entityDtoMapper;
+    @MockitoBean
+    private DiaryMapper entityDtoMapper;  // MockMapper
+
+    @MockitoBean
+    private EmotionPredictService emotionPredictService;
+
+    @BeforeEach
+    public void setupMock() {
+        when(emotionPredictService.predictEmotionFromText(Mockito.anyString()))
+                .thenReturn(2);
+
+        // Mock DiaryMapper
+        when(entityDtoMapper.mapFrom(Mockito.any()))
+                .thenAnswer(invocation -> {
+                    DiaryDto dto = invocation.getArgument(0);
+                    DiaryEntity entity = new DiaryEntity();
+                    entity.setDiary_content(dto.getDiary_content());
+                    entity.setDiary_emotion(dto.getDiary_emotion());
+                    entity.setDiary_date(dto.getDiary_date());
+                    return entity;
+                });
+
+        when(entityDtoMapper.mapTo(Mockito.any()))
+                .thenAnswer(invocation -> {
+                    DiaryEntity entity = invocation.getArgument(0);
+                    DiaryDto dto = new DiaryDto();
+                    dto.setDiary_content(entity.getDiary_content());
+                    dto.setDiary_emotion(entity.getDiary_emotion());
+                    dto.setDiary_date(entity.getDiary_date());
+                    return dto;
+                });
+    }
 
     /*
                             -- WARNING --
