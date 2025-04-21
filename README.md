@@ -30,6 +30,11 @@ Bu proje; günlük yazma alışkanlığı olan kullanıcıların ruh halini anal
 - **PostgreSQL**: Veritabanı.
 - **Docker**: Hem Spring hem Flask için container yapıları.
 
+### 📱 Mobile App
+
+Bu backend'i kullanan mobil uygulamaya aşağıdaki bağlantıdan ulaşabilirsiniz:  
+👉 [Mobile App](https://github.com/umutsaydam/DearDiaryApp)
+
 ## 🛠 <span id="kullanılan-teknolojiler">Kullanılan Teknolojiler</span>
 
 - Java 17  
@@ -120,6 +125,11 @@ This project was developed for users who have a habit of writing diaries to:
 - **Flask**: Performs sentiment analysis on text input and classifies it into categories such as ['Sadness', 'Joy', 'Love', 'Anger', 'Fear', 'Surprise'], returning an integer index as a response.
 - **PostgreSQL**: Database.
 - **Docker**: Container structures for both Spring and Flask services.
+
+### 📱 Mobile App
+
+You can access the mobile app that uses this backend service from the link below: 
+👉 [Mobile App](https://github.com/umutsaydam/DearDiaryApp)
 
 ## 🛠 <span id="technologies-used">Technologies Used</span>
 
