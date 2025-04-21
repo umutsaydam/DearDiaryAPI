@@ -1,4 +1,4 @@
-name: CI/CD Workflow
+name: CI Workflow
 
 on:
   push:
@@ -39,24 +39,6 @@ jobs:
           docker build -t emotion-api .
           docker run -d --network app-network --name emotion-api-container -p 5000:5000 emotion-api
 
-      - name: Push Spring Boot Image to Docker Hub
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-          docker tag myapp $DOCKER_USERNAME/myapp:latest
-          docker push $DOCKER_USERNAME/myapp:latest
-
-      - name: Push Flask Image to Docker Hub
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-          docker tag emotion-api $DOCKER_USERNAME/emotion-api:latest
-          docker push $DOCKER_USERNAME/emotion-api:latest
-
       - name: Clean up Docker containers
         if: always()
         run: |
@@ -64,45 +46,3 @@ jobs:
           docker stop emotion-api-container || true
           docker rm myapp-container || true
           docker rm emotion-api-container || true
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          port: 22
-          script: |
-            echo "Deploying to EC2..."
-
-            if ! [ -x "$(command -v docker)" ]; then
-              echo "Docker not found, installing..."
-              sudo apt update
-              sudo apt install -y docker.io
-              sudo usermod -aG docker $USER
-            fi
-
-            docker stop myapp-container || true
-            docker rm myapp-container || true
-            docker stop emotion-api-container || true
-            docker rm emotion-api-container || true
-
-            docker network ls | grep app-network || docker network create app-network
-
-            docker pull ${{ secrets.DOCKER_USERNAME }}/emotion-api:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-
-            docker run -d --name postgres-db --network app-network -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=123456 -p 5432:5432 postgres
-
-            docker run -d --name emotion-api-container --network app-network -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/emotion-api:latest
-
-            docker run -d --name myapp-container --network app-network -p 8080:8080 \
-              -e DB_URL=jdbc:postgresql://postgres-db:5432/postgres \
-              -e DB_USERNAME=postgres \
-              -e DB_PASSWORD=123456 \
-              ${{ secrets.DOCKER_USERNAME }}/myapp:latest

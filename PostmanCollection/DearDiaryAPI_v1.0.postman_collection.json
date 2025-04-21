@@ -1,0 +1,435 @@
+{
+	"info": {
+		"_postman_id": "3cd2bc89-9fa6-482a-bcc6-0d4ac1501cfc",
+		"name": "DearDiaryAPI_v1.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27424105"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "CreateUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"umut\",\r\n    \"password\":\"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						},
+						"description": "### Create User\n\nThis endpoint is used to create a new user.\n\n#### Request Body\n\n- `username`: (string) The username of the new user.\n    \n- `password`: (string) The password for the new user.\n    \n\n#### Response\n\nThe response will contain the details of the newly created user. If user can created successfully the returns 201 status code. If username you selected already taken, then returns 401 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "LoginUser",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"umut\",\r\n    \"password\":\"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						},
+						"description": "### User Login\n\nThis endpoint is used to authenticate a user and generate a session token for subsequent API calls.\n\n#### Request Body\n\n- `username` (string) - The username of the user.\n    \n- `password` (string) - The password of the user.\n    \n\n#### Response\n\nThe response for this request is a JSON object with the following properties:\n\n#### Response\n\n``` json\n{\n    \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiOWVjYzViZGUtNTQ2My00OTc1LWExMzktMjVhZWU0MGM1YjJjIiwiaWF0IjoxNzQ0MjA0Njc4LCJleHAiOjE3NDQyMDgyNzh9.K_UCYiXKr9MlAQK2LWH9DuBY1LyTaPrmY9BwV4ny5j0\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "ChangePassword",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiOWVjYzViZGUtNTQ2My00OTc1LWExMzktMjVhZWU0MGM1YjJjIiwiaWF0IjoxNzQ0MjA1MTQzLCJleHAiOjE3NDQyMDg3NDN9.ntlsxumAWAyEl9G6v9Um8Ik0gE7qBtmSbyWMzf6F7Z0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"current_password\":\"password\",\r\n    \"new_password\":\"password1\",\r\n    \"new_password_confirm\":\"password1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"change-password"
+							]
+						},
+						"description": "### Change User Password\n\nThis endpoint is used to update the user's password.\n\n#### Request\n\n- `current_password`: The current password of the user. _(string)_\n    \n- `new_password`: The new password for the user. _(string)_\n    \n- `new_password_confirm`: Confirmation of the new password. _(string)_\n    \n\n#### Response\n\nThe response for this request is documented as a JSON schema.\n\n``` json\n{\n    \"user_id\": \"9ecc5bde-5463-4975-a139-25aee40c5b2c\",\n    \"username\": \"umut\",\n    \"password\": \"$2a$10$WtIHFdtzs/Yb2EgzJIW/LuNl35ZrDqNE4Fnoe59LFymDNwF54GOQ.\"\n}\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "LogoutUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiOWVjYzViZGUtNTQ2My00OTc1LWExMzktMjVhZWU0MGM1YjJjIiwiaWF0IjoxNzQ0MjA1MTQzLCJleHAiOjE3NDQyMDg3NDN9.ntlsxumAWAyEl9G6v9Um8Ik0gE7qBtmSbyWMzf6F7Z0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"logout"
+							]
+						},
+						"description": "### /user/logout\n\nThis endpoint is used to log out the user.\n\n#### Request\n\n- No request body is required for this endpoint.\n    \n\n#### Response\n\n- The response is of type text/plain.\n    \n- The response body contains the message \"Logged out successfully\".\n    \n\n``` json\nLogged out successfully\n ```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Diary",
+			"item": [
+				{
+					"name": "SaveDiary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiYTIzMzg4MDQtMGVjYS00MTg4LWE3MDctMWY5YzM2ZmY5YTNhIiwiaWF0IjoxNzQ0OTk4NjAwLCJleHAiOjE3NDUwMDIyMDB9.3GdjndD86qEAp1vvQdksEHaMQ_nEfwA8swms_XLnmY0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"diary_date\":\"2025-04-01 14:56:31\",\n    \"diary_content\":\"I am happy today.\",\n    \"diary_emotion\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/diary/save-diary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"diary",
+								"save-diary"
+							]
+						},
+						"description": "### Save Diary\n\nThis endpoint allows the user to save diary content.\n\n#### Request Body\n\n- diary_content (string, required): The content of the diary entry.\n    \n\n#### Response\n\nThe response body is a JSON object with the following schema:\n\n``` json\n{\n    \"diary_id\": \"742a3ba1-65a1-4f6b-a2b0-77b09ab4510a\",\n    \"diary_date\": \"2025-04-09 13:33:40\",\n    \"diary_content\": \"I am happy today.\",\n    \"diary_emotion\": 1\n}\n\n ```\n\nA successful response will return a `200 OK` or `201 Created` status code.\n\n#### Body\n\nThe body might contains a few content:\n\n``` json\n{\n    \"diary_date\":\"2025-04-11 17:56:31\",\n    \"diary_content\":\"I am happy today.\",\n    \"diary_emotion\":2\n}\nOR\n{\n    \"diary_date\":\"2025-04-11 17:56:31\",\n    \"diary_content\":\"I am happy today.\"\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "GetDiaries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiMjg3NzZiZWYtNWZjZC00ZjA0LWIyYmMtNDEzZjhhMzMwMTRkIiwiaWF0IjoxNzQ0MjA1NTk3LCJleHAiOjE3NDQyMDkxOTd9.m3zBZFengRs6hi7sW5aQ9ePZrCckjLjpj-aRy-gnqKc",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/diary/get-diaries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"diary",
+								"get-diaries"
+							]
+						},
+						"description": "This is a GET request to retrieve diary entries from the specified endpoint. The request does not include a request body, but query parameters can be used to specify the resource to retrieve.\n\n### Request Body\n\nThis request does not include a request body.\n\n### Response Body\n\nThe response will have a status of 200 (OK) and will contain a JSON array of diary entries. Each diary entry object includes the following keys:\n\n- `diary_id`: The unique identifier for the diary entry.\n    \n- `diary_date`: The date of the diary entry.\n    \n- `diary_content`: The content of the diary entry.\n    \n- `diary_emotion`: The emotion associated with the diary entry.\n    \n\nAn example response body:\n\n``` json\n[{\"diary_id\":\"\",\"diary_date\":\"\",\"diary_content\":\"\",\"diary_emotion\":0}]\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteDiary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful DELETE request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiMjg3NzZiZWYtNWZjZC00ZjA0LWIyYmMtNDEzZjhhMzMwMTRkIiwiaWF0IjoxNzQ0MjA1NTk3LCJleHAiOjE3NDQyMDkxOTd9.m3zBZFengRs6hi7sW5aQ9ePZrCckjLjpj-aRy-gnqKc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/diary/delete-diary/742a3ba1-65a1-4f6b-a2b0-77b09ab4510a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"diary",
+								"delete-diary",
+								"742a3ba1-65a1-4f6b-a2b0-77b09ab4510a"
+							]
+						},
+						"description": "### Delete Diary Entry\n\nThis endpoint is used to delete a specific diary entry identified by the provided ID.\n\n#### Request\n\n- Method: DELETE\n    \n- URL: `{{base_url}}/diary/delete-diary/742a3ba1-65a1-4f6b-a2b0-77b09ab4510a`\n    \n\n#### Response\n\nThe response for this request is a JSON schema and the content type is `text/xml`.\n\n#### Request Body\n\nThis request does not require a request body.\n\n#### Response Body\n\nThe response body for this request is not available. Response status is 200 OK."
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateDiary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful PUT request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiMjg3NzZiZWYtNWZjZC00ZjA0LWIyYmMtNDEzZjhhMzMwMTRkIiwiaWF0IjoxNzQ0MjA1NTk3LCJleHAiOjE3NDQyMDkxOTd9.m3zBZFengRs6hi7sW5aQ9ePZrCckjLjpj-aRy-gnqKc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"diary_id\": \"36a5bc6b-9283-44a2-ae44-8ff45fa25b6f\",\n    \"diary_date\": \"2025-04-07 14:38:20\",\n    \"diary_content\": \"I am happy.\",\n    \"diary_emotion\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/diary/update-diary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"diary",
+								"update-diary"
+							]
+						},
+						"description": "### Update Diary Entry\n\nThis endpoint is used to update an existing diary entry.\n\n#### Request Body\n\n- `diary_id` (string): The unique identifier of the diary entry to be updated.\n    \n- `diary_date` (string): The date and time of the diary entry.\n    \n- `diary_content` (string): The content of the diary entry.\n    \n- `diary_emotion` (number): The emotion associated with the diary entry.\n    \n\n#### Response\n\nThe response is in JSON format and has the following schema:\n\n``` json\n{\n    \"diary_id\": \"36a5bc6b-9283-44a2-ae44-8ff45fa25b6f\",\n    \"diary_date\": \"2025-04-07 14:38:20\",\n    \"diary_content\": \"I am happy.\",\n    \"diary_emotion\": 0\n}\n\n ```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Statistics",
+			"item": [
+				{
+					"name": "TotalDiaryStatistics",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiOWIzMjg1ZmEtZjZmMy00ZGRiLTlkMjctZjI5ZWNlODFjMWM4IiwiaWF0IjoxNzQ0OTgwNjE2LCJleHAiOjE3NDQ5ODQyMTZ9.oOyBBYlK3nrwEyv2SGNkiq3pltxzma4esGQrX01HFxc",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/total-diary-statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"total-diary-statistics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TotalDiaryEmotionStatistics",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1bXV0IiwidXNlcklkIjoiODg4ZDRkMDItMzA5Ni00OWQ3LThlZTktNDE4NDU0ODcyYmExIiwiaWF0IjoxNzQ0OTkyOTk3LCJleHAiOjE3NDQ5OTY1OTd9.ZhHvbKeQIyxdRXdI2G48S-wVA1rxmsqxXIc1uqOU0t4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/statistics/total-emotion-statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"total-emotion-statistics"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}
