@@ -20,16 +20,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build and Test with Maven
-        run: mvn clean install
-        working-directory: DearDiary
+      - name: Create Docker Network
+        run: docker network create app-network
 
-      - name: Dockerize Application
+      - name: Build and Test with Maven
+        working-directory: DearDiary
+        run: mvn clean install
+
+      - name: Dockerize Spring Boot Application
+        working-directory: DearDiary
         run: |
           docker build -t myapp .
-          docker run -d -p 8080:8080 myapp
+          docker run -d --network app-network --name myapp-container -p 8080:8080 myapp
 
-      - name: Push Docker Image to Docker Hub
+      - name: Dockerize Flask Application
+        working-directory: emotionAnalysisFromText
+        run: |
+          docker build -t emotion-api .
+          docker run -d --network app-network --name emotion-api-container -p 5000:5000 emotion-api
+
+      - name: Push Spring Boot Image to Docker Hub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -37,3 +47,20 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker tag myapp $DOCKER_USERNAME/myapp:latest
           docker push $DOCKER_USERNAME/myapp:latest
+
+      - name: Push Flask Image to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker tag emotion-api $DOCKER_USERNAME/emotion-api:latest
+          docker push $DOCKER_USERNAME/emotion-api:latest
+
+      - name: Clean up Docker containers
+        if: always()
+        run: |
+          docker stop myapp-container || true
+          docker stop emotion-api-container || true
+          docker rm myapp-container || true
+          docker rm emotion-api-container || true
