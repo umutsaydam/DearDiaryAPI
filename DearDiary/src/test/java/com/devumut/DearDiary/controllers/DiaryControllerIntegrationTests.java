@@ -1,13 +1,11 @@
 package com.devumut.DearDiary.controllers;
 
 import com.devumut.DearDiary.TestDataUtil;
-import com.devumut.DearDiary.config.TestConfig;
 import com.devumut.DearDiary.domain.dto.DiaryDto;
 import com.devumut.DearDiary.domain.entities.DiaryEntity;
 import com.devumut.DearDiary.domain.entities.UserEntity;
 import com.devumut.DearDiary.exceptions.DiaryNotFoundException;
 import com.devumut.DearDiary.jwt.JwtUtil;
-import com.devumut.DearDiary.mappers.Mapper;
 import com.devumut.DearDiary.mappers.impl.DiaryMapper;
 import com.devumut.DearDiary.services.DiaryService;
 import com.devumut.DearDiary.services.EmotionPredictService;
@@ -19,37 +17,52 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@Testcontainers
+@SpringBootTest
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 public class DiaryControllerIntegrationTests {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @DynamicPropertySource
+    static void overrideProps(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -72,7 +85,7 @@ public class DiaryControllerIntegrationTests {
     @Autowired
     private TokenService tokenService;
 
-    @MockitoBean
+    @Autowired
     private DiaryMapper entityDtoMapper;  // MockMapper
 
     @MockitoBean
@@ -82,27 +95,6 @@ public class DiaryControllerIntegrationTests {
     public void setupMock() {
         when(emotionPredictService.predictEmotionFromText(Mockito.anyString()))
                 .thenReturn(2);
-
-        // Mock DiaryMapper
-        when(entityDtoMapper.mapFrom(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    DiaryDto dto = invocation.getArgument(0);
-                    DiaryEntity entity = new DiaryEntity();
-                    entity.setDiary_content(dto.getDiary_content());
-                    entity.setDiary_emotion(dto.getDiary_emotion());
-                    entity.setDiary_date(dto.getDiary_date());
-                    return entity;
-                });
-
-        when(entityDtoMapper.mapTo(Mockito.any()))
-                .thenAnswer(invocation -> {
-                    DiaryEntity entity = invocation.getArgument(0);
-                    DiaryDto dto = new DiaryDto();
-                    dto.setDiary_content(entity.getDiary_content());
-                    dto.setDiary_emotion(entity.getDiary_emotion());
-                    dto.setDiary_date(entity.getDiary_date());
-                    return dto;
-                });
     }
 
     /*
@@ -117,7 +109,13 @@ public class DiaryControllerIntegrationTests {
 
         String token = jwtUtil.generateToken(userEntity.getUser_id(), userEntity.getUsername());
         tokenService.saveToken(userEntity.getUser_id(), token);
+
+        LocalDateTime localDateTime = LocalDateTime.of(2025, 4, 18, 7, 57);
+        Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
         DiaryDto diaryDto = TestDataUtil.getDiaryDtoA();
+        diaryDto.setDiary_date(date);
+        diaryDto.setDiary_emotion(2);
 
         String diaryJson = mapper.writeValueAsString(diaryDto);
 

@@ -2,11 +2,9 @@ name: CI/CD Workflow
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
@@ -21,13 +19,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      
-      - name: Build with Maven
-        run: mvn clean install
-        working-directory: DearDiary
 
-      - name: Run Unit Tests
-        run: mvn test
+      - name: Build and Test with Maven
+        run: mvn clean install
         working-directory: DearDiary
 
       - name: Dockerize Application
@@ -36,6 +30,9 @@ jobs:
           docker run -d -p 8080:8080 myapp
 
       - name: Push Docker Image to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker tag myapp $DOCKER_USERNAME/myapp:latest
